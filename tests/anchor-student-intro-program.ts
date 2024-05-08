@@ -16,7 +16,8 @@ describe("anchor-student-intro-program", () => {
 
   const [studentPda] = anchor.web3.PublicKey
     .findProgramAddressSync([provider.wallet.publicKey.toBuffer()], program.programId)
-  it("Add introduction", async () => {
+
+  it("1.Add introduction", async () => {
     // Add your test here.
     const tx = await program.methods
       .addStudentIntro(student.name, student.message)
@@ -26,4 +27,27 @@ describe("anchor-student-intro-program", () => {
     expect(studentAccount.name).to.equal(student.name);
     expect(studentAccount.message).to.equal(student.message);
   });
+
+  it('2.Add introduction twice', async() => {
+    let transacion_success = false
+    try {
+      const tx = await program.methods
+        .addStudentIntro("Alice", "My name is Alice.")
+        .rpc() 
+      transacion_success = true
+    } catch (error) {
+      transacion_success = false
+    }
+    expect(transacion_success, 'transaction should be failed').to.equal(false)
+  })
+
+  it('3. Update student intro', async() => {
+    const newMessage = "Remote computer broker!"
+    const tx = await program.methods
+      .updateStudent(student.name, newMessage)
+      .rpc()
+    const studentAccount = await program.account.studentInfoState.fetch(studentPda)
+    expect(studentAccount.name).to.equal(student.name)
+    expect(studentAccount.message).to.equal(newMessage)
+  })
 });
